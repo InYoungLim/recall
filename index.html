@@ -105,7 +105,7 @@ th{border-top:2px solid var(--yale);background:var(--wash);color:var(--yale);fon
   .flow .ar{width:auto;height:28px}
   .flow .ar svg{transform:rotate(90deg)}
   .flow .rel{padding:4px 0;justify-content:center}
-  .grid{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:1fr 1fr!important}
   .tl .row{grid-template-columns:52px 1fr;gap:8px}
   .dgm th,.dgm td{padding:8px 6px;overflow-wrap:anywhere}
 }
@@ -231,7 +231,7 @@ function bx(it,num){return el('div',{class:'bx'+(it.k?' k':'')},num?el('div',{cl
 function block(b){
   const w=el('div',{class:'dgm'});
   if(b.type==='flow'){const f=el('div',{class:'flow'});b.items.forEach((it,i)=>{if(i){f.append(b.rel?el('div',{class:'rel'},b.rel[i-1]||''):el('div',{class:'ar',html:ARROW}))}f.append(bx(it))});w.append(f)}
-  else if(b.type==='grid'){const g=el('div',{class:'grid'});b.items.forEach((it,i)=>g.append(bx(it,b.numbered?String(i+1):'')));w.append(g)}
+  else if(b.type==='grid'){const n=b.items.length,cols=n===4?4:n%3===0?3:Math.min(n,4);const g=el('div',{class:'grid',style:'grid-template-columns:repeat('+cols+',minmax(0,1fr))'});b.items.forEach((it,i)=>g.append(bx(it,b.numbered?String(i+1):'')));w.append(g)}
   else if(b.type==='table'){w.append(el('table',{},el('thead',{},el('tr',{},b.head.map(h=>el('th',{},h)))),el('tbody',{},b.rows.map(r=>el('tr',{},r.map(x=>el('td',{},x)))))))}
   else if(b.type==='timeline'){const t=el('div',{class:'tl'});b.items.forEach(it=>t.append(el('div',{class:'row'+(it.d?'':' nod')},it.d?el('div',{class:'d'},it.d):'',bx(it))));w.append(t)}
   else if(b.type==='chart'){w.append(el('div',{class:'chart',html:chart(b)}))}
