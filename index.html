@@ -16,18 +16,18 @@
   --serif:'Noto Serif KR',Georgia,serif;--head:'Yale 2024','YaleNew','Libre Caslon Text','Noto Serif KR',Georgia,serif}
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{display:flex;min-height:100vh;background:#fff;color:var(--ink);font-family:var(--serif);font-size:16px;line-height:1.6;word-break:keep-all;overflow-wrap:break-word}
+body{display:flex;min-height:100vh;background:#fff;color:var(--ink);font-family:var(--serif);font-size:14px;line-height:1.6;word-break:keep-all;overflow-wrap:break-word}
 ::selection{background:var(--yale);color:#fff}
 :focus-visible{outline:2px solid var(--yale2);outline-offset:2px}
-button{font:inherit;color:inherit;background:#fff;border:1px solid var(--yale);border-radius:0;padding:8px 18px;cursor:pointer;min-height:44px}
+button{font:inherit;color:inherit;background:#fff;border:1px solid var(--yale);border-radius:0;padding:7px 16px;cursor:pointer;min-height:38px}
 button:hover{background:var(--wash)}
 button.primary{background:var(--yale);color:#fff}
 button.primary:hover{background:#0a4a8f}
-#side{width:230px;flex:none;background:var(--yale);color:#fff;padding:36px 22px;position:sticky;top:0;height:100vh;overflow-y:auto}
+#side{width:250px;flex:none;background:var(--yale);color:#fff;padding:36px 22px;position:sticky;top:0;height:100vh;overflow-y:auto}
 #side .brand{display:flex;gap:12px;align-items:center;margin-bottom:14px}
-#side .brand img{width:40px;height:auto;flex:none}
-#side .brand .y{font-family:var(--head);font-size:20px;line-height:1.3}
-#side .brand .sc{line-height:1.3;color:#dbe5f1}
+#side .brand img{width:36px;height:auto;flex:none}
+#side .brand .y{font-family:var(--head);font-size:18px;line-height:1.3}
+#side .brand .sc{font-size:12px;line-height:1.4;color:#dbe5f1;white-space:nowrap;letter-spacing:.02em}
 #side .term{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #1d4f86;padding-top:10px;margin-bottom:18px}
 #side .term a,#side .term span{border:0;padding:0;display:inline}
 #side .term .on{color:#fff;font-weight:700}
@@ -37,8 +37,8 @@ button.primary:hover{background:#0a4a8f}
 #side .foot{margin-top:22px;color:#c9d9ee}
 #side .foot button{background:none;border:0;color:#fff;text-decoration:underline;text-underline-offset:3px;padding:0;min-height:0;font:inherit}
 #app{flex:1;min-width:0;max-width:820px;padding:36px 44px 120px}
-h1{font-family:var(--head);font-weight:400;color:var(--yale);font-size:20px;line-height:1.4;margin-bottom:6px;text-wrap:balance}
-h2{font-family:var(--serif);font-weight:700;color:var(--yale);font-size:16px;line-height:1.6;margin:0 0 6px}
+h1{font-family:var(--head);font-weight:400;color:var(--yale);font-size:18px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;text-wrap:balance}
+h2{font-family:var(--serif);font-weight:700;color:var(--yale);font-size:14px;line-height:1.6;margin:0 0 4px}
 .sub{color:var(--ink2);margin-bottom:20px}
 .tabs{display:flex;gap:22px;border-bottom:1px solid var(--rule);margin-bottom:22px}
 .tabs button{border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:8px 0;background:none;color:var(--ink2)}
@@ -59,7 +59,7 @@ h2{font-family:var(--serif);font-weight:700;color:var(--yale);font-size:16px;lin
 .card .kor{color:var(--ink2);margin-bottom:8px}
 .dgm{margin:14px 0 6px}
 .dgm .note{color:var(--ink2);margin-top:6px}
-.bx{background:var(--wash);border:1px solid var(--rule);padding:10px 12px;text-align:center}
+.bx{background:var(--wash);border:1px solid var(--rule);padding:8px 10px;text-align:center}
 .bx.k{background:var(--yale);border-color:var(--yale);color:#fff}
 .bx .s{color:var(--ink2)}
 .bx.k .s{color:#dbe5f1}
@@ -70,14 +70,14 @@ h2{font-family:var(--serif);font-weight:700;color:var(--yale);font-size:16px;lin
 .flow .ar{flex:none;width:36px;display:flex;align-items:center;justify-content:center;color:var(--ink2)}
 .flow .ar svg{width:22px;height:12px}
 .flow .rel{flex:none;padding:0 10px;display:flex;align-items:center;color:var(--ink2)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.grid{display:flex;flex-direction:column;gap:6px}.grid .bx{display:flex;gap:10px;align-items:baseline;text-align:left;padding:7px 12px}.grid .bx .n{flex:none;min-width:12px}
 .tl{border-left:1px solid var(--rule);margin-left:6px}
-.tl .row{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;padding:4px 0 4px 14px;position:relative}
+.tl .row{display:grid;grid-template-columns:80px 1fr;gap:12px;align-items:center;padding:4px 0 4px 14px;position:relative}
 .tl .row::before{content:'';position:absolute;left:-4px;top:50%;width:7px;height:7px;margin-top:-4px;background:var(--yale)}
 .tl .row.nod{grid-template-columns:1fr}
 .tl .d{color:var(--yale);font-variant-numeric:tabular-nums}
-.tl .bx{text-align:left}
-.chart{max-width:480px}
+.tl .bx{text-align:left;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:7px 12px}
+.chart{max-width:440px}
 .chart svg{width:100%;height:auto;display:block}
 .dgm table td:first-child{color:var(--yale)}
 .card .one{margin:18px 0 8px;max-width:60ch}
@@ -95,7 +95,7 @@ th{border-top:2px solid var(--yale);background:var(--wash);color:var(--yale);fon
 @media (max-width:760px){
   body{display:block}
   #side{width:auto;height:auto;position:static;padding:14px 18px 8px;display:block}
-  #side .brand{margin-bottom:8px}#side .brand img{width:30px}#side .brand .sc br{display:none}#side .term{margin-bottom:6px}
+  #side .brand{margin-bottom:8px}#side .brand img{width:30px}#side .term{margin-bottom:6px}
   #side .list{display:flex;gap:18px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
   #side .list::-webkit-scrollbar{display:none}
   #side a{border:0;padding:6px 0;flex:none}
@@ -105,8 +105,8 @@ th{border-top:2px solid var(--yale);background:var(--wash);color:var(--yale);fon
   .flow .ar{width:auto;height:28px}
   .flow .ar svg{transform:rotate(90deg)}
   .flow .rel{padding:4px 0;justify-content:center}
-  .grid{grid-template-columns:1fr 1fr!important}
   .tl .row{grid-template-columns:52px 1fr;gap:8px}
+
   .dgm th,.dgm td{padding:8px 6px;overflow-wrap:anywhere}
 }
 </style>
@@ -149,7 +149,7 @@ function pick(c,only){
 }
 function side(){
   const s=document.getElementById('side');s.textContent='';
-  s.append(el('div',{class:'brand'},el('img',{src:'crest.png?v=3',alt:'Yale School of Public Health'}),el('div',{},el('div',{class:'y'},'Yale'),el('div',{class:'sc'},'School of ',el('br'),'Public Health'))));
+  s.append(el('div',{class:'brand'},el('img',{src:'crest.png?v=3',alt:'Yale School of Public Health'}),el('div',{},el('div',{class:'y'},'Yale'),el('div',{class:'sc'},'School of Public Health'))));
   s.append(el('div',{class:'term'},TERMS.map(t=>t.id===TERM?el('span',{class:'on'},`Review (${t.id})`):el('a',{href:t.href},`Review (${t.id})`))));
   const l=el('div',{class:'list'});
   COURSES.forEach(c=>{const n=itemsOf(c.id).length,k=due(c.id).length+(n?Math.min(NEWMAX,fresh(c.id).length):0);
@@ -231,7 +231,7 @@ function bx(it,num){return el('div',{class:'bx'+(it.k?' k':'')},num?el('div',{cl
 function block(b){
   const w=el('div',{class:'dgm'});
   if(b.type==='flow'){const f=el('div',{class:'flow'});b.items.forEach((it,i)=>{if(i){f.append(b.rel?el('div',{class:'rel'},b.rel[i-1]||''):el('div',{class:'ar',html:ARROW}))}f.append(bx(it))});w.append(f)}
-  else if(b.type==='grid'){const n=b.items.length,cols=n===4?4:n%3===0?3:Math.min(n,4);const g=el('div',{class:'grid',style:'grid-template-columns:repeat('+cols+',minmax(0,1fr))'});b.items.forEach((it,i)=>g.append(bx(it,b.numbered?String(i+1):'')));w.append(g)}
+  else if(b.type==='grid'){const g=el('div',{class:'grid'});b.items.forEach((it,i)=>g.append(bx(it,b.numbered?String(i+1):'')));w.append(g)}
   else if(b.type==='table'){w.append(el('table',{},el('thead',{},el('tr',{},b.head.map(h=>el('th',{},h)))),el('tbody',{},b.rows.map(r=>el('tr',{},r.map(x=>el('td',{},x)))))))}
   else if(b.type==='timeline'){const t=el('div',{class:'tl'});b.items.forEach(it=>t.append(el('div',{class:'row'+(it.d?'':' nod')},it.d?el('div',{class:'d'},it.d):'',bx(it))));w.append(t)}
   else if(b.type==='chart'){w.append(el('div',{class:'chart',html:chart(b)}))}
@@ -239,9 +239,9 @@ function block(b){
   return w;
 }
 function chart(b){
-  const W=Math.min(480,Math.max(300,innerWidth-36)),H=Math.round(W*(b.h||0.62)),L=40,R=12,T=16,B=44,pw=W-L-R,ph=H-T-B;
+  const W=Math.min(440,Math.max(300,innerWidth-36)),H=Math.round(W*(b.h||0.62)),L=40,R=12,T=16,B=44,pw=W-L-R,ph=H-T-B;
   const X=v=>L+v*pw,Y=v=>T+(1-v)*ph,esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-  let s=`<svg viewBox="0 0 ${W} ${H}" font-family="inherit" font-size="16">`;
+  let s=`<svg viewBox="0 0 ${W} ${H}" font-family="inherit" font-size="14">`;
   s+=`<line x1="${L}" y1="${T}" x2="${L}" y2="${T+ph}" stroke="#3F4A5A" stroke-width="1.5"/><line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="#3F4A5A" stroke-width="1.5"/>`;
   s+=`<text x="${L+pw/2}" y="${H-12}" text-anchor="middle" fill="#3F4A5A">${esc(b.x)}</text><text transform="translate(16 ${T+ph/2}) rotate(-90)" text-anchor="middle" fill="#3F4A5A">${esc(b.y)}</text>`;
   const P=b.points;
