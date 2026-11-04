@@ -37,7 +37,7 @@ button.primary:hover{background:#0a4a8f}
 #side .foot{margin-top:22px;color:#c9d9ee}
 #side .foot button{background:none;border:0;color:#fff;text-decoration:underline;text-underline-offset:3px;padding:0;min-height:0;font:inherit}
 #app{flex:1;min-width:0;max-width:820px;padding:36px 44px 120px}
-h1{font-family:var(--head);font-weight:400;color:var(--yale);font-size:18px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;text-wrap:balance}
+h1{font-family:var(--head);font-weight:400;color:var(--yale);font-size:18px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
 h2{font-family:var(--serif);font-weight:700;color:var(--yale);font-size:14px;line-height:1.6;margin:0 0 4px}
 .sub{color:var(--ink2);margin-bottom:20px}
 .tabs{display:flex;gap:22px;border-bottom:1px solid var(--rule);margin-bottom:22px}
@@ -92,6 +92,30 @@ th{border-top:2px solid var(--yale);background:var(--wash);color:var(--yale);fon
 .set{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0}
 .set input{font:inherit;border:1px solid var(--rule);padding:6px 8px;border-radius:0;min-height:40px}
 .src{color:var(--ink2);max-width:62ch;margin-top:18px}
+#side .crow{display:flex;align-items:center;gap:4px;border-bottom:1px solid #1d4f86}
+#side .crow a{flex:1;border:0}
+#side a.cur{color:#fff}
+#side .chev{background:none;border:0;padding:0;min-height:0;width:16px;height:28px;color:#c9d9ee;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#side .chev::before{content:'';border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor;transition:transform .15s}
+#side .chev.closed::before{transform:rotate(-90deg)}
+#side .chev:hover{background:none;color:#fff}
+#side .chev-sp{width:16px;flex:none}
+#side .weeks{padding:2px 0 6px 20px;border-bottom:1px solid #1d4f86}
+#side .weeks a{border:0;padding:3px 0;color:#c9d9ee}
+#side .weeks a.on{color:#fff;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:-8px 0 18px}
+.chips button{min-height:30px;padding:3px 12px;border-color:var(--rule)}
+.chips button.on{background:var(--yale);border-color:var(--yale);color:#fff}
+.wgroup{border-top:2px solid var(--yale);padding:10px 0 18px}
+.whead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}
+.whead h2{margin:0}
+.whead button{min-height:32px;padding:4px 12px}
+.irow{display:flex;gap:14px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--rule);color:var(--ink);text-decoration:none}
+.irow:hover{background:var(--wash)}
+.irow .it{color:var(--yale);font-weight:700;flex:none}
+.irow .ik{color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:14px}
+.pager button{max-width:40%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:760px){
   body{display:block}
   #side{width:auto;height:auto;position:static;padding:14px 18px 8px;display:block}
@@ -100,6 +124,11 @@ th{border-top:2px solid var(--yale);background:var(--wash);color:var(--yale);fon
   #side .list::-webkit-scrollbar{display:none}
   #side a{border:0;padding:6px 0;flex:none}
   #side .foot{display:none}
+  #side .weeks,#side .chev,#side .chev-sp{display:none}
+  #side .crow{border:0;flex:none}
+  .irow{flex-direction:column;gap:0}
+  .irow .ik{white-space:normal}
+  .pager button{max-width:100%}
   #app{padding:20px 18px 100px;overflow-x:hidden}
   .flow{flex-direction:column}
   .flow .ar{width:auto;height:28px}
@@ -139,11 +168,17 @@ const daysLeft=c=>Math.max(0,Math.round((new Date(examOf(c)+'T00:00').getTime()-
 // 간격: 기본 1·2·4·7일, 시험까지 남은 기간의 25%를 넘지 않게 줄인다
 const gap=(c,box)=>{const dl=daysLeft(c);return Math.max(1,Math.min(BASE[box],dl>0?Math.round(dl*0.25):1))};
 
-let cur={course:'ehs544',tab:'today',concept:null}, run=null;
+let cur={course:'ehs544',tab:'today',concept:null,week:null}, run=null;
+const openC=new Set(['ehs544']);
 const due=c=>itemsOf(c).filter(isDue).sort((a,b)=>b.importance-a.importance);
 const fresh=c=>itemsOf(c).filter(isNew).sort((a,b)=>b.importance-a.importance||parseInt(a.week)-parseInt(b.week));
-function pick(c,only){
+const wk=k=>String(k.week).split(/\s*,\s*/);
+const weeksOf=c=>[...new Set(CONCEPTS.filter(k=>k.course===c).flatMap(wk))].sort((a,b)=>parseInt(a)-parseInt(b));
+const conceptsOf=(c,w)=>CONCEPTS.filter(k=>k.course===c&&(!w||wk(k).includes(w)));
+const itemsOfWeek=(c,w)=>{const ids=new Set(conceptsOf(c,w).map(k=>k.id));return itemsOf(c).filter(x=>ids.has(x.concept))};
+function pick(c,only,w){
   if(only)return shuffle(itemsOf(c).filter(x=>x.concept===only));
+  if(w)return shuffle(itemsOfWeek(c,w));
   const d=due(c).slice(0,SESSION), n=fresh(c).slice(0,Math.max(0,Math.min(NEWMAX,SESSION-d.length)||NEWMAX));
   return shuffle(d.concat(n)).slice(0,SESSION);
 }
@@ -152,13 +187,18 @@ function side(){
   s.append(el('div',{class:'brand'},el('img',{src:'crest.png?v=3',alt:'Yale School of Public Health'}),el('div',{},el('div',{class:'y'},'Yale'),el('div',{class:'sc'},'School of Public Health'))));
   s.append(el('div',{class:'term'},TERMS.map(t=>t.id===TERM?el('span',{class:'on'},`Review (${t.id})`):el('a',{href:t.href},`Review (${t.id})`))));
   const l=el('div',{class:'list'});
-  COURSES.forEach(c=>{const n=itemsOf(c.id).length,k=due(c.id).length+(n?Math.min(NEWMAX,fresh(c.id).length):0);
-    l.append(el('a',{class:(cur.course===c.id?'on ':'')+(n?'':'empty'),href:'#',onclick:e=>{e.preventDefault();go(c.id,'today')}},el('span',{},c.name),el('span',{},n?k+'문제':'준비 중')))});
+  COURSES.forEach(c=>{const n=itemsOf(c.id).length,k=due(c.id).length+(n?Math.min(NEWMAX,fresh(c.id).length):0),open=n&&openC.has(c.id);
+    const row=el('div',{class:'crow'});
+    row.append(n?el('button',{class:'chev'+(open?'':' closed'),'aria-label':open?'접기':'펼치기',onclick:()=>{open?openC.delete(c.id):openC.add(c.id);side()}}):el('span',{class:'chev-sp'}));
+    row.append(el('a',{class:(cur.course===c.id&&!cur.week?'on ':cur.course===c.id?'cur ':'')+(n?'':'empty'),href:'#',onclick:e=>{e.preventDefault();openC.add(c.id);go(c.id,'today')}},el('span',{},c.name),el('span',{},n?k+'문제':'준비 중')));
+    l.append(row);
+    if(open){const wl=el('div',{class:'weeks'});weeksOf(c.id).forEach(w=>wl.append(el('a',{href:'#',class:cur.course===c.id&&cur.week===w?'on':'',onclick:e=>{e.preventDefault();go(c.id,'map',null,w)}},el('span',{},w),el('span',{},`개념 ${conceptsOf(c.id,w).length}`))));l.append(wl)}
+  });
   s.append(l);
   s.append(el('div',{class:'foot'},el('button',{onclick:exp},'내보내기'),' · ',el('button',{onclick:()=>document.getElementById('imp').click()},'가져오기'),
     el('input',{id:'imp',type:'file',accept:'.json',style:'display:none',onchange:imp})));
 }
-function go(c,tab,concept){cur={course:c,tab,concept:concept||null};run=null;render();window.scrollTo(0,0)}
+function go(c,tab,concept,week){cur={course:c,tab,concept:concept||null,week:week||null};run=null;render();window.scrollTo(0,0)}
 function render(){
   side();const app=document.getElementById('app');app.textContent='';
   const c=course(cur.course), all=itemsOf(c.id);
@@ -166,16 +206,20 @@ function render(){
   if(!all.length){app.append(el('p',{class:'sub'},'문제 준비 중'));return}
   app.append(el('p',{class:'sub'},`문제 ${all.length}개 · 복습 ${due(c.id).length} · 새 문제 ${fresh(c.id).length}`));
   const tabs=el('div',{class:'tabs'});
-  [['today','오늘'],['map','개념 지도'],['log','기록']].forEach(([k,l])=>tabs.append(el('button',{class:cur.tab===k?'on':'',onclick:()=>go(c.id,k)},l)));
+  [['today','오늘'],['map','개념 지도'],['log','기록']].forEach(([k,l])=>tabs.append(el('button',{class:cur.tab===k?'on':'',onclick:()=>go(c.id,k,null,k==='log'?null:cur.week)},l)));
   app.append(tabs);
+  if(cur.tab!=='log'){const ch=el('div',{class:'chips'});
+    ch.append(el('button',{class:!cur.week?'on':'',onclick:()=>go(c.id,cur.tab)},'전체'));
+    weeksOf(c.id).forEach(w=>ch.append(el('button',{class:cur.week===w?'on':'',onclick:()=>go(c.id,cur.tab,null,w)},w)));
+    app.append(ch)}
   ({today:today,map:map,log:log})[cur.tab](app,c);
 }
 function today(app,c){
   if(!run){
-    const list=pick(c.id,cur.concept);
+    const list=pick(c.id,cur.concept,cur.week);
     if(!list.length){app.append(el('p',{},'오늘 복습을 마쳤습니다.'));return}
     const cc=cur.concept&&CONCEPTS.find(x=>x.id===cur.concept);
-    app.append(el('h2',{},cc?cc.title:'오늘의 복습'),el('p',{class:'sub'},`${list.length}문제`),
+    app.append(el('h2',{},cc?cc.title:cur.week?`${cur.week} 문제`:'오늘의 복습'),el('p',{class:'sub'},`${list.length}문제`),
       el('div',{class:'bar'},el('button',{class:'primary',onclick:()=>{run={q:list.map(x=>x.id),i:0,ok:0,miss:new Set(),done:false,asked:new Set()};render()}},'시작')));
     return;
   }
@@ -210,20 +254,36 @@ function end(app,c){
   cs.forEach(id=>{const k=CONCEPTS.find(z=>z.id===id);if(k)app.append(el('p',{},el('button',{onclick:()=>go(c.id,'map',id)},k.title)))});
   app.append(el('div',{class:'bar'},el('button',{class:'primary',onclick:()=>{run=null;render()}},'이어서 풀기')));
 }
+function card(k,c){
+  const n=DATA.filter(d=>d.concept===k.id).length;
+  const cd=el('section',{class:'card'},el('div',{class:'eyebrow'},k.week),el('h2',{},k.title),el('p',{class:'kor'},k.kor));
+  if(Array.isArray(k.diagram))k.diagram.forEach(b=>cd.append(block(b)));
+  else if(k.diagram)cd.append(el('div',{class:'dgm',html:k.diagram}));
+  cd.append(el('p',{class:'one'},k.oneline));
+  if(k.points&&k.points.length)cd.append(el('ul',{},k.points.map(p=>el('li',{},p))));
+  if(k.terms&&k.terms.length){const t=el('div',{class:'terms'});k.terms.forEach(([a,b])=>t.append(el('b',{},a),el('span',{},b)));cd.append(t)}
+  if(n)cd.append(el('div',{class:'bar'},el('button',{class:'primary',onclick:()=>go(c.id,'today',k.id)},`문제 ${n}개 풀기`)));
+  return cd;
+}
+function idxRow(k,c,w){return el('a',{class:'irow',href:'#',onclick:e=>{e.preventDefault();go(c.id,'map',k.id,w)}},el('span',{class:'it'},k.title),el('span',{class:'ik'},k.kor))}
 function map(app,c){
-  const all=CONCEPTS.filter(k=>k.course===c.id);
-  const list=cur.concept?all.filter(k=>k.id===cur.concept):all;
-  if(cur.concept)app.append(el('p',{},el('button',{onclick:()=>go(c.id,'map')},'전체 개념')));
-  list.forEach(k=>{
-    const n=DATA.filter(d=>d.concept===k.id).length;
-    const card=el('section',{class:'card'},el('div',{class:'eyebrow'},k.week),el('h2',{},k.title),el('p',{class:'kor'},k.kor));
-    if(Array.isArray(k.diagram))k.diagram.forEach(b=>card.append(block(b)));
-    else if(k.diagram)card.append(el('div',{class:'dgm',html:k.diagram}));
-    card.append(el('p',{class:'one'},k.oneline));
-    if(k.points&&k.points.length)card.append(el('ul',{},k.points.map(p=>el('li',{},p))));
-    if(k.terms&&k.terms.length){const t=el('div',{class:'terms'});k.terms.forEach(([a,b])=>t.append(el('b',{},a),el('span',{},b)));card.append(t)}
-    if(n)card.append(el('div',{class:'bar'},el('button',{class:'primary',onclick:()=>go(c.id,'today',k.id)},`문제 ${n}개 풀기`)));
-    app.append(card)});
+  if(cur.concept){
+    const seq=conceptsOf(c.id,cur.week), i=seq.findIndex(k=>k.id===cur.concept), k=CONCEPTS.find(z=>z.id===cur.concept);
+    app.append(card(k,c));
+    const prev=seq[i-1], next=seq[i+1];
+    app.append(el('div',{class:'pager'},
+      prev?el('button',{onclick:()=>go(c.id,'map',prev.id,cur.week)},'이전 · '+prev.title):el('span',{}),
+      el('button',{onclick:()=>go(c.id,'map',null,cur.week)},'목록'),
+      next?el('button',{onclick:()=>go(c.id,'map',next.id,cur.week)},'다음 · '+next.title):el('span',{})));
+    return;
+  }
+  const weeks=cur.week?[cur.week]:weeksOf(c.id);
+  weeks.forEach(w=>{
+    const ks=conceptsOf(c.id,w), n=itemsOfWeek(c.id,w).length;
+    const g=el('section',{class:'wgroup'},el('div',{class:'whead'},el('h2',{},w),n?el('button',{onclick:()=>go(c.id,'today',null,w)},`${w} 문제 ${n}개 풀기`):''));
+    ks.forEach(k=>g.append(idxRow(k,c,cur.week||null)));
+    app.append(g);
+  });
 }
 /* 도식: 모든 과목이 같은 다섯 가지 형식과 같은 스타일을 쓴다 */
 const ARROW='<svg viewBox="0 0 22 12"><line x1="0" y1="6" x2="16" y2="6" stroke="#3F4A5A" stroke-width="1.5"/><path d="M15 1 L22 6 L15 11 Z" fill="#3F4A5A"/></svg>';
