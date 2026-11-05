@@ -116,6 +116,15 @@ th{border-top:2px solid var(--yale);background:var(--wash);color:var(--yale);fon
 .irow .ik{color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:14px}
 .pager button{max-width:40%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.im{color:var(--ink2);font-weight:400;white-space:nowrap;margin-left:auto;font-variant-numeric:tabular-nums}
+.im.full{color:var(--yale);font-weight:700}
+.whead h2 .im{margin-left:0}
+details.qb{border-bottom:1px solid var(--rule);padding:8px 0}
+details.qb summary{cursor:pointer;list-style:none;display:flex;gap:12px;align-items:baseline}
+details.qb summary::-webkit-details-marker{display:none}
+details.qb .qm{flex:none;color:var(--ink2);font-variant-numeric:tabular-nums}
+details.qb[open] summary{font-weight:700}
+details.qb > div{padding:8px 0 4px}
 @media (max-width:760px){
   body{display:block}
   #side{width:auto;height:auto;position:static;padding:14px 18px 8px;display:block}
@@ -127,6 +136,8 @@ th{border-top:2px solid var(--yale);background:var(--wash);color:var(--yale);fon
   #side .weeks,#side .chev,#side .chev-sp{display:none}
   #side .crow{border:0;flex:none}
   .irow{flex-direction:column;gap:0}
+  .irow .im{margin-left:0}
+  details.qb summary{flex-direction:column;gap:0}
   .irow .ik{white-space:normal}
   .pager button{max-width:100%}
   #app{padding:20px 18px 100px;overflow-x:hidden}
@@ -175,8 +186,12 @@ const fresh=c=>itemsOf(c).filter(isNew).sort((a,b)=>b.importance-a.importance||p
 const wk=k=>String(k.week).split(/\s*,\s*/);
 const weeksOf=c=>[...new Set(CONCEPTS.filter(k=>k.course===c).flatMap(wk))].sort((a,b)=>parseInt(a)-parseInt(b));
 const conceptsOf=(c,w)=>CONCEPTS.filter(k=>k.course===c&&(!w||wk(k).includes(w)));
+const mastered=x=>{const s=S(x.id);return !!s&&s.box>=2};
+const mast=list=>`${list.filter(mastered).length}/${list.length}`;
+const wrongs=c=>itemsOf(c).filter(x=>{const s=S(x.id);return s&&s.wrong>0}).sort((a,b)=>(S(b.id).lastWrong||0)-(S(a.id).lastWrong||0));
 const itemsOfWeek=(c,w)=>{const ids=new Set(conceptsOf(c,w).map(k=>k.id));return itemsOf(c).filter(x=>ids.has(x.concept))};
 function pick(c,only,w){
+  if(only==='__wrong')return shuffle(wrongs(c).filter(x=>!mastered(x)).concat(wrongs(c).filter(mastered)).slice(0,SESSION));
   if(only)return shuffle(itemsOf(c).filter(x=>x.concept===only));
   if(w)return shuffle(itemsOfWeek(c,w));
   const d=due(c).slice(0,SESSION), n=fresh(c).slice(0,Math.max(0,Math.min(NEWMAX,SESSION-d.length)||NEWMAX));
@@ -206,20 +221,20 @@ function render(){
   if(!all.length){app.append(el('p',{class:'sub'},'문제 준비 중'));return}
   app.append(el('p',{class:'sub'},`문제 ${all.length}개 · 복습 ${due(c.id).length} · 새 문제 ${fresh(c.id).length}`));
   const tabs=el('div',{class:'tabs'});
-  [['today','오늘'],['map','개념 지도'],['log','기록']].forEach(([k,l])=>tabs.append(el('button',{class:cur.tab===k?'on':'',onclick:()=>go(c.id,k,null,k==='log'?null:cur.week)},l)));
+  [['today','오늘'],['map','개념 지도'],['bank','오답'],['log','기록']].forEach(([k,l])=>tabs.append(el('button',{class:cur.tab===k?'on':'',onclick:()=>go(c.id,k,null,(k==='log'||k==='bank')?null:cur.week)},l)));
   app.append(tabs);
-  if(cur.tab!=='log'){const ch=el('div',{class:'chips'});
+  if(cur.tab==='today'||cur.tab==='map'){const ch=el('div',{class:'chips'});
     ch.append(el('button',{class:!cur.week?'on':'',onclick:()=>go(c.id,cur.tab)},'전체'));
     weeksOf(c.id).forEach(w=>ch.append(el('button',{class:cur.week===w?'on':'',onclick:()=>go(c.id,cur.tab,null,w)},w)));
     app.append(ch)}
-  ({today:today,map:map,log:log})[cur.tab](app,c);
+  ({today:today,map:map,bank:bank,log:log})[cur.tab](app,c);
 }
 function today(app,c){
   if(!run){
     const list=pick(c.id,cur.concept,cur.week);
     if(!list.length){app.append(el('p',{},'오늘 복습을 마쳤습니다.'));return}
-    const cc=cur.concept&&CONCEPTS.find(x=>x.id===cur.concept);
-    app.append(el('h2',{},cc?cc.title:cur.week?`${cur.week} 문제`:'오늘의 복습'),el('p',{class:'sub'},`${list.length}문제`),
+    const cc=cur.concept&&cur.concept!=='__wrong'&&CONCEPTS.find(x=>x.id===cur.concept);
+    app.append(el('h2',{},cur.concept==='__wrong'?'오답 다시 풀기':cc?cc.title:cur.week?`${cur.week} 문제`:'오늘의 복습'),el('p',{class:'sub'},`${list.length}문제`),
       el('div',{class:'bar'},el('button',{class:'primary',onclick:()=>{run={q:list.map(x=>x.id),i:0,ok:0,miss:new Set(),done:false,asked:new Set()};render()}},'시작')));
     return;
   }
@@ -237,7 +252,7 @@ function ans(x,i){
   if(!run.asked.has(x.id)){
     run.asked.add(x.id);
     const s=S(x.id)||{box:-1,seen:0,wrong:0};s.seen++;
-    if(ok){s.box=Math.min(BASE.length-1,s.box+1);run.ok++}else{s.box=0;s.wrong++;run.miss.add(x.id);run.q.splice(Math.min(run.q.length,run.i+4),0,x.id)}
+    s.lastOk=ok;if(ok){s.box=Math.min(BASE.length-1,s.box+1);run.ok++}else{s.box=0;s.wrong++;s.lastWrong=Date.now();run.miss.add(x.id);run.q.splice(Math.min(run.q.length,run.i+4),0,x.id)}
     if(s.box<0)s.box=0;s.due=t0()+gap(x.course,s.box)*DAY;store.items[x.id]=s;save();
   }
   const fb=document.getElementById('fb');
@@ -256,7 +271,8 @@ function end(app,c){
 }
 function card(k,c){
   const n=DATA.filter(d=>d.concept===k.id).length;
-  const cd=el('section',{class:'card'},el('div',{class:'eyebrow'},k.week),el('h2',{},k.title),el('p',{class:'kor'},k.kor));
+  const its=DATA.filter(d=>d.concept===k.id);
+  const cd=el('section',{class:'card'},el('div',{class:'eyebrow'},k.week+(its.length?' · 숙달 '+mast(its):'')),el('h2',{},k.title),el('p',{class:'kor'},k.kor));
   if(Array.isArray(k.diagram))k.diagram.forEach(b=>cd.append(block(b)));
   else if(k.diagram)cd.append(el('div',{class:'dgm',html:k.diagram}));
   cd.append(el('p',{class:'one'},k.oneline));
@@ -265,7 +281,7 @@ function card(k,c){
   if(n)cd.append(el('div',{class:'bar'},el('button',{class:'primary',onclick:()=>go(c.id,'today',k.id)},`문제 ${n}개 풀기`)));
   return cd;
 }
-function idxRow(k,c,w){return el('a',{class:'irow',href:'#',onclick:e=>{e.preventDefault();go(c.id,'map',k.id,w)}},el('span',{class:'it'},k.title),el('span',{class:'ik'},k.kor))}
+function idxRow(k,c,w){const its=DATA.filter(d=>d.concept===k.id);return el('a',{class:'irow',href:'#',onclick:e=>{e.preventDefault();go(c.id,'map',k.id,w)}},el('span',{class:'it'},k.title),el('span',{class:'ik'},k.kor),its.length?el('span',{class:'im'+(its.every(mastered)?' full':'')},'숙달 '+mast(its)):'')}
 function map(app,c){
   if(cur.concept){
     const seq=conceptsOf(c.id,cur.week), i=seq.findIndex(k=>k.id===cur.concept), k=CONCEPTS.find(z=>z.id===cur.concept);
@@ -280,7 +296,7 @@ function map(app,c){
   const weeks=cur.week?[cur.week]:weeksOf(c.id);
   weeks.forEach(w=>{
     const ks=conceptsOf(c.id,w), n=itemsOfWeek(c.id,w).length;
-    const g=el('section',{class:'wgroup'},el('div',{class:'whead'},el('h2',{},w),n?el('button',{onclick:()=>go(c.id,'today',null,w)},`${w} 문제 ${n}개 풀기`):''));
+    const g=el('section',{class:'wgroup'},el('div',{class:'whead'},el('h2',{},w,el('span',{class:'im'},' · 숙달 '+mast(itemsOfWeek(c.id,w)))),n?el('button',{onclick:()=>go(c.id,'today',null,w)},`${w} 문제 ${n}개 풀기`):''));
     ks.forEach(k=>g.append(idxRow(k,c,cur.week||null)));
     app.append(g);
   });
@@ -312,6 +328,16 @@ function chart(b){
     if(pos==='l'){tx=X(p.x)-12;an='end'}if(pos==='b'){tx=X(p.x);ty=Y(p.y)+26;an='middle'}if(pos==='t'){tx=X(p.x);ty=Y(p.y)-14;an='middle'}
     s+=`<text x="${tx}" y="${ty}" text-anchor="${an}" fill="#1D2430">${esc(p.l)}</text>`});
   return s+'</svg>';
+}
+function bank(app,c){
+  const ws=wrongs(c.id);
+  if(!ws.length){app.append(el('p',{},'아직 틀린 문제가 없습니다.'));return}
+  const open=ws.filter(x=>!mastered(x)).length;
+  app.append(el('div',{class:'whead'},el('h2',{},`틀린 문제 ${ws.length}개 · 아직 숙달 전 ${open}개`),el('button',{class:'primary',onclick:()=>go(c.id,'today','__wrong')},'오답 다시 풀기')));
+  ws.forEach(x=>{const s=S(x.id);app.append(el('details',{class:'qb'},
+    el('summary',{},el('span',{class:'qm'},`${x.week} · 오답 ${s.wrong}회`+(mastered(x)?' · 숙달':'')),el('span',{},x.q)),
+    el('div',{},el('p',{class:'res'},'정답: '+x.options[x.answer]),el('p',{class:'exp'},x.explain),
+      x.concept?el('div',{class:'bar'},el('button',{onclick:()=>go(c.id,'map',x.concept)},'개념 보기')):'')))});
 }
 function log(app,c){
   const rows=itemsOf(c.id).map(x=>({x,s:S(x.id)})).sort((a,b)=>((b.s?b.s.wrong:-1)-(a.s?a.s.wrong:-1))||b.x.importance-a.x.importance);
